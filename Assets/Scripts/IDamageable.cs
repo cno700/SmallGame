@@ -1,11 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// åªæœ‰æ‹¥æœ‰IDamageableæ¥å£çš„objectæ‰èƒ½è§¦å‘å‡»ä¸­æ–¹æ³•
 public interface IDamageable
 {
-    // hitÓÃÀ´Ìá¹©Ò»Ğ©¶îÍâµÄĞÅÏ¢£¬±ÈÈçÔÚÄÄÀï±»»÷ÖĞ
-    void TakeHit(float damage, RaycastHit hit);
+    // hitç”¨æ¥æä¾›ä¸€äº›é¢å¤–çš„ä¿¡æ¯ï¼Œæ¯”å¦‚åœ¨å“ªé‡Œè¢«å‡»ä¸­
+    void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection);
 
-    void TakeDamage(float damage); // TakeHitµÄ¼ò»¯°æ±¾£¬ÒòÎªÔÚµĞÈË¹¥»÷Íæ¼ÒÊ±ÎŞ·¨Ìá¹©Ray
+    void TakeDamage(float damage); // TakeHitçš„ç®€åŒ–ç‰ˆæœ¬ï¼Œå› ä¸ºåœ¨æ•Œäººæ”»å‡»ç©å®¶æ—¶æ— æ³•æä¾›Ray
 }

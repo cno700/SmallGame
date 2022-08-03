@@ -1,31 +1,32 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// åªæœ‰æ‹¥æœ‰IDamageableæ¥å£çš„objectæ‰èƒ½è§¦å‘å‡»ä¸­æ–¹æ³•
 public class LivingEntity : MonoBehaviour, IDamageable
 {
     public float startingHealth;
     protected float health;
     protected bool dead;
 
-    public event System.Action OnDeath; // 1.ÏòSpawnerÌáÊ¾ÏûÃğÒ»¸öµĞÈË 2.ÏòEnemyÌáÊ¾Íæ¼Ò±»ÏûÃğ
-    // ÕâÀïÄ¿Ç°ÓĞ¸ö¼ÇÒä·½·¨£ºÎ¯ÍĞÊÇÎÒÏ£Íû·¢ÉúÁËÊ²Ã´ÊÂ£¬±ğÈË»áÔõÑù£¬
-    // ÄÇÃ´¾ÍÒªÔÚ×Ô¼ºµÄÀàÀï¶¨ÒåÊÂ¼ş£¬ÔÚ±ğÈËÄÇÀï½«Ï£ÍûËû×öµÄÊÂ×¢²áµ½ÎÒµÄÊÂ¼şÀï£¬
-    // Ö®ºóµÈµ½ÎÒÊ²Ã´Ê±ºò·¢ÉúÊÂÇéÁË£¬ÄÇÃ´µ÷ÓÃÖ®Ç°×¢²á¹ıµÄ±ğÈËµÄ·½·¨¡£
+    public event System.Action OnDeath; // 1.å‘Spawneræç¤ºæ¶ˆç­ä¸€ä¸ªæ•Œäºº 2.å‘Enemyæç¤ºç©å®¶è¢«æ¶ˆç­
+    // è¿™é‡Œç›®å‰æœ‰ä¸ªè®°å¿†æ–¹æ³•ï¼šå§”æ‰˜æ˜¯æˆ‘å¸Œæœ›å‘ç”Ÿäº†ä»€ä¹ˆäº‹ï¼Œåˆ«äººä¼šæ€æ ·ï¼Œ
+    // é‚£ä¹ˆå°±è¦åœ¨è‡ªå·±çš„ç±»é‡Œå®šä¹‰äº‹ä»¶ï¼Œåœ¨åˆ«äººé‚£é‡Œå°†å¸Œæœ›ä»–åšçš„äº‹æ³¨å†Œåˆ°æˆ‘çš„äº‹ä»¶é‡Œï¼Œ
+    // ä¹‹åç­‰åˆ°æˆ‘ä»€ä¹ˆæ—¶å€™å‘ç”Ÿäº‹æƒ…äº†ï¼Œé‚£ä¹ˆè°ƒç”¨ä¹‹å‰æ³¨å†Œè¿‡çš„åˆ«äººçš„æ–¹æ³•ã€‚
 
-    protected virtual void Start() // virtualĞé·½·¨
+    protected virtual void Start() // virtualè™šæ–¹æ³•
     {
         health = startingHealth;
     }
 
-    public void TakeHit(float damage, RaycastHit hit) // ÊÕµ½ÉËº¦£¬ÉúÃüÖµ¼õÒ»
+    public virtual void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection) // æ”¶åˆ°ä¼¤å®³ï¼Œç”Ÿå‘½å€¼å‡ä¸€
     {
         // do some stuff here with hit var
-        // ±ÈÈçÊµÏÖÅö×²Á£×ÓĞ§¹û
+        // æ¯”å¦‚å®ç°ç¢°æ’ç²’å­æ•ˆæœ
         TakeDamage(damage);
     }
 
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage)
     {
         health -= damage;
         if (health <= 0 && !dead)
@@ -34,6 +35,7 @@ public class LivingEntity : MonoBehaviour, IDamageable
         }
     }
 
+    [ContextMenu("Self Destruct")] // ï¼ˆæ–¹ä¾¿åœ¨ç¼–è¾‘å™¨ä¸è¿è¡Œçš„çŠ¶æ€ä¸‹è¿›è¡Œè°ƒè¯•â€”â€”è¿è¡Œåå³å‡»è„šæœ¬ç»„ä»¶ï¼‰
     protected void Die()
     {
         dead = true;

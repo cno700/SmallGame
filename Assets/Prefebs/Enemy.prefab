@@ -111,6 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingHealth: 2
+  deathEffect: {fileID: 6898898804540830973, guid: 7f7bb1cb8a47c4147a4d71054a74e210, type: 3}
 --- !u!195 &2246735469804495710
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -122,9 +123,9 @@ NavMeshAgent:
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
-  m_Acceleration: 8
+  m_Acceleration: 20
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 720
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1

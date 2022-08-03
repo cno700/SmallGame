@@ -1,27 +1,31 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public LayerMask collisionMask; // Ö»Ñ¡ÔñLayermask²ãÄÚµÄÅö×²Æ÷£¬ÆäËû²ãÄÚÅö×²Æ÷ºöÂÔ
+    public LayerMask collisionMask; // åªé€‰æ‹©Layermaskå±‚å†…çš„ç¢°æ’å™¨ï¼Œå…¶ä»–å±‚å†…ç¢°æ’å™¨å¿½ç•¥
+    public Color trailColour; // ##### é€šè¿‡è¯¥å±æ€§ä¿®æ”¹å­å¼¹è½¨è¿¹é¢œè‰²ï¼ˆæœ‰é—®é¢˜ï¼Œæœªå®ç°ï¼‰
+
     float speed = 10;
     float damage = 1;
 
     float lifetime = 3;
-    float skinWidth = .1f; // Åö×²¼ì²âÊ±²¹³¥µĞÈËÒÆ¶¯µÄ¾àÀë
+    float skinWidth = .1f; // ç¢°æ’æ£€æµ‹æ—¶è¡¥å¿æ•Œäººç§»åŠ¨çš„è·ç¦»
 
     private void Start()
     {
-        Destroy(gameObject, lifetime); // ±£Ö¤×Óµ¯³¬³öÒ»¶¨Ê±¼ä»áÏûÊ§
+        Destroy(gameObject, lifetime); // ä¿è¯å­å¼¹è¶…å‡ºä¸€å®šæ—¶é—´ä¼šæ¶ˆå¤±
 
-        // Èç¹ûÉú³ÉµÄ×Óµ¯ÔÚµĞÈËÄÚ²¿
+        // å¦‚æœç”Ÿæˆçš„å­å¼¹åœ¨æ•Œäººå†…éƒ¨
         Collider[] initialCollisions = Physics.OverlapSphere(transform.position, .1f, collisionMask);
-        // ·µ»ØÒÔµÚÒ»¸ö²ÎÊıÎªÔ­µã¡¢µÚ¶ş¸ö²ÎÊıÎª°ë¾¶µÄÇòÌåÄÚ£¬ËùÓĞLayerÎªµÚÈı¸ö²ÎÊıµÄÅö×²Ìå¼¯ºÏ
+        // è¿”å›ä»¥ç¬¬ä¸€ä¸ªå‚æ•°ä¸ºåŸç‚¹ã€ç¬¬äºŒä¸ªå‚æ•°ä¸ºåŠå¾„çš„çƒä½“å†…ï¼Œæ‰€æœ‰Layerä¸ºç¬¬ä¸‰ä¸ªå‚æ•°çš„ç¢°æ’ä½“é›†åˆ
         if (initialCollisions.Length > 0)
         {
-            OnHitObject(initialCollisions[0]);
+            OnHitObject(initialCollisions[0], transform.position);
         }
+
+        GetComponent<TrailRenderer>().material.SetColor("_TintColor", trailColour); // ####### æ— ååº”
     }
 
     public void SetSpeed(float newSpeed)
@@ -41,31 +45,20 @@ public class Projectile : MonoBehaviour
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
 
-        //hit: Ê¹ÓÃout¹Ø¼ü×Ö´«ÈëÒ»¸ö¿ÕµÄÅö×²ĞÅÏ¢Àà£¬È»ºóÅö×²ºó¸³Öµ¡£¿ÉÒÔµÃµ½Åö×²ÎïÌåµÄtransform,rigidbody,pointµÈĞÅÏ¢¡£
+        //hit: ä½¿ç”¨outå…³é”®å­—ä¼ å…¥ä¸€ä¸ªç©ºçš„ç¢°æ’ä¿¡æ¯ç±»ï¼Œç„¶åç¢°æ’åèµ‹å€¼ã€‚å¯ä»¥å¾—åˆ°ç¢°æ’ç‰©ä½“çš„transform,rigidbody,pointç­‰ä¿¡æ¯ã€‚
         if (Physics.Raycast(ray, out hit, moveDistance + skinWidth, collisionMask, QueryTriggerInteraction.Collide))
         {
-            OnHitObject(hit);
+            OnHitObject(hit.collider, hit.point);
         }
     }
 
-    void OnHitObject(RaycastHit hit)
-    {
-        //print(hit.collider.gameObject.name);
-        IDamageable damageableObject = hit.collider.GetComponent<IDamageable>();
-        // Ö»ÓĞÓµÓĞIDamageable½Ó¿ÚµÄobject²ÅÄÜ´¥·¢»÷ÖĞ·½·¨
-        if (damageableObject != null)
-        {
-            damageableObject.TakeHit(damage, hit);
-        }
-        GameObject.Destroy(gameObject);
-    }
-
-    void OnHitObject(Collider c)
+    void OnHitObject(Collider c, Vector3 hitPoint)
     {
         IDamageable damageableObject = c.GetComponent<IDamageable>();
+        // åªæœ‰æ‹¥æœ‰IDamageableæ¥å£çš„objectæ‰èƒ½è§¦å‘å‡»ä¸­æ–¹æ³•
         if (damageableObject != null)
         {
-            damageableObject.TakeDamage(damage);
+            damageableObject.TakeHit(damage, hitPoint, transform.forward);
         }
         GameObject.Destroy(gameObject);
     }

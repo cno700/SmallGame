@@ -27,11 +27,19 @@ public class GunController : MonoBehaviour
         equipedGun.transform.parent = weaponHold; // 保持枪和手同步移动和旋转
     }
 
-    public void Shoot()
+    public void OnTriggerHold()
     {
         if (equipedGun != null)
         {
-            equipedGun.Shoot();
+            equipedGun.OnTriggerHold();
+        }
+    }
+
+    public void OnTriggerRelease()
+    {
+        if (equipedGun != null)
+        {
+            equipedGun.OnTriggerRelease();
         }
     }
 }

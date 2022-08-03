@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,33 +24,37 @@ public class Player : LivingEntity
     
     void Update()
     {
-        // ÒÆ¶¯ÊäÈë
+        // ç§»åŠ¨è¾“å…¥
         //vector3 moveinput = new vector3(input.getaxis("horizontal"), 0, input.getaxis("vertical"));
         Vector3 moveInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        // GetAxisºÍGetAxisRawµÄÇø±ğÔÚÓÚÇ°ÕßÓµÓĞÆ½»¬¹ı¶É¹¦ÄÜ£¨ÒÆ¶¯»áÍùÇ°»¬ĞĞÒ»µã£©
+        // GetAxiså’ŒGetAxisRawçš„åŒºåˆ«åœ¨äºå‰è€…æ‹¥æœ‰å¹³æ»‘è¿‡æ¸¡åŠŸèƒ½ï¼ˆç§»åŠ¨ä¼šå¾€å‰æ»‘è¡Œä¸€ç‚¹ï¼‰
 
-        Vector3 moveVelocity = moveInput.normalized * moveSpeed; // ¹éÒ»»¯ÒÔ»ñµÃ·½Ïò£¬ÔÙ³ËÒÔËÙ¶È
+        Vector3 moveVelocity = moveInput.normalized * moveSpeed; // å½’ä¸€åŒ–ä»¥è·å¾—æ–¹å‘ï¼Œå†ä¹˜ä»¥é€Ÿåº¦
         controller.Move(moveVelocity);
 
 
-        // Ö¸ÏòÊäÈë
-        Ray ray = viewCamera.ScreenPointToRay(Input.mousePosition); // »ñÈ¡Ïà»úÖ¸ÏòÊó±êÎ»ÖÃµÄÉäÏß
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero); // ´´½¨Æ½Ãæ£¬µÚÒ»¸ö²ÎÊıÎªÆ½ÃæµÄ·¨ÏòÁ¿£¬µÚ¶ş¸ö²ÎÊıÎªÆ½ÃæÆğÊ¼µã
-        float rayDistance; // Line35Ê¹ÓÃout¹Ø¼ü×Ö¿ÉÒÔ½«Î´³õÊ¼»¯µÄ±äÁ¿´«µİ¸ø·½·¨£¨Êä³öĞÍ²ÎÊı´«µİ¡¢ÒıÓÃ´«µİ£©
+        // æŒ‡å‘è¾“å…¥
+        Ray ray = viewCamera.ScreenPointToRay(Input.mousePosition); // è·å–ç›¸æœºæŒ‡å‘é¼ æ ‡ä½ç½®çš„å°„çº¿
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero); // åˆ›å»ºå¹³é¢ï¼Œç¬¬ä¸€ä¸ªå‚æ•°ä¸ºå¹³é¢çš„æ³•å‘é‡ï¼Œç¬¬äºŒä¸ªå‚æ•°ä¸ºå¹³é¢èµ·å§‹ç‚¹
+        float rayDistance; // Line35ä½¿ç”¨outå…³é”®å­—å¯ä»¥å°†æœªåˆå§‹åŒ–çš„å˜é‡ä¼ é€’ç»™æ–¹æ³•ï¼ˆè¾“å‡ºå‹å‚æ•°ä¼ é€’ã€å¼•ç”¨ä¼ é€’ï¼‰
 
-        // Èç¹ûrayÓëµØÆ½ÃæÏà½»£¬rayDistanceÎªÏà»úµ½½»µãµÄ¾àÀë
+        // å¦‚æœrayä¸åœ°å¹³é¢ç›¸äº¤ï¼ŒrayDistanceä¸ºç›¸æœºåˆ°äº¤ç‚¹çš„è·ç¦»
         if (groundPlane.Raycast(ray, out rayDistance))
         {
             Vector3 point = ray.GetPoint(rayDistance);
-            Debug.DrawLine(ray.origin, point, Color.blue); // ÔÚSceneÖĞÏÔÊ¾Ö¸Ïò½»µãµÄºìÏß
+            //Debug.DrawLine(ray.origin, point, Color.blue); // åœ¨Sceneä¸­æ˜¾ç¤ºæŒ‡å‘äº¤ç‚¹çš„çº¢çº¿
             controller.LookAt(point);
         }
 
 
-        // ÎäÆ÷ÊäÈë
+        // æ­¦å™¨è¾“å…¥
         if (Input.GetMouseButton(0))
         {
-            gunController.Shoot();
+            gunController.OnTriggerHold();
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            gunController.OnTriggerRelease();
         }
     }
 }

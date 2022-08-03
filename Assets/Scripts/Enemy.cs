@@ -1,3 +1,4 @@
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,10 +10,12 @@ public class Enemy : LivingEntity
     public enum State {Idle, Chasing, Attacking};
     State currentState;
 
+    public ParticleSystem deathEffect;
+
     NavMeshAgent pathfinder;
     Transform target;
-    Material skinMaterial; // ¹¥»÷Ê±µĞÈËÑÕÉ«·¢Éú±ä»¯£¬ËùÒÔÕâÀïÒª»ñÈ¡²ÄÖÊ×é¼ş
-    LivingEntity targetEntity; // »ñÈ¡Ä¿±êÊµÌå
+    Material skinMaterial; // æ”»å‡»æ—¶æ•Œäººé¢œè‰²å‘ç”Ÿå˜åŒ–ï¼Œæ‰€ä»¥è¿™é‡Œè¦è·å–æè´¨ç»„ä»¶
+    LivingEntity targetEntity; // è·å–ç›®æ ‡å®ä½“
     Color originalColour;
 
     float attackDistanceThreshold = 0.5f;
@@ -20,32 +23,67 @@ public class Enemy : LivingEntity
     float damage = 1;
 
     float nextAttackTime;
-    float myCollisionRadius; // ×ÔÉíÅö×²°ë¾¶
-    float targetCollisionRadius; // Ä¿±êÅö×²°ë¾¶£¬µĞÈË×îÖÕµ¼º½µÄÄ¿µÄµØÊÇ½Ó´¥µ½Íæ¼Ò£¬¶ø²»ÊÇÍæ¼ÒµÄ×¼È·Î»ÖÃ
+    float myCollisionRadius; // è‡ªèº«ç¢°æ’åŠå¾„
+    float targetCollisionRadius; // ç›®æ ‡ç¢°æ’åŠå¾„ï¼Œæ•Œäººæœ€ç»ˆå¯¼èˆªçš„ç›®çš„åœ°æ˜¯æ¥è§¦åˆ°ç©å®¶ï¼Œè€Œä¸æ˜¯ç©å®¶çš„å‡†ç¡®ä½ç½®
 
     bool hasTarget;
 
-    protected override void Start()
+    private void Awake()
     {
-        base.Start(); // ¼Ì³Ğ²¢±£ÁôÁË¸¸ÀàµÄStart()ÖĞÖ´ĞĞµÄËùÓĞ´úÂë£¬·ñÔòÍêÈ«¸²¸Çµô¸¸ÀàµÄStart·½·¨
+        // ç”±äºEnemy.SetCharacteristics()åœ¨æ•Œäººç”Ÿæˆçš„é‚£ä¸€å¸§å°±è°ƒç”¨ï¼Œä¼šåœ¨Start()å‰è°ƒç”¨ï¼Œæ‰€ä»¥pathfinderã€harTargetç­‰åæ‰§è¡Œï¼Œå°†å…¶æ”¾åœ¨Awakeé‡Œå°±èƒ½å¯ä»¥äº†
         pathfinder = GetComponent<NavMeshAgent>();
-        skinMaterial = GetComponent<Renderer>().material;
-        originalColour = skinMaterial.color;
-
         if (GameObject.FindGameObjectWithTag("Player") != null)
         {
             hasTarget = true;
-            currentState = State.Chasing; // ÉèÖÃµĞÈË³õÊ¼×´Ì¬ÎªChasing
             target = GameObject.FindGameObjectWithTag("Player").transform;
-            targetEntity = target.GetComponent<LivingEntity>(); // »ñÈ¡Àà¶ø²»ÊÇGameObject
-            targetEntity.OnDeath += OnTargetDeath; // ½«·½·¨×¢²áµ½ÊÂ¼şÖĞ£¬µÈ´ı´¥·¢
-
-
+            targetEntity = target.GetComponent<LivingEntity>(); // è·å–ç±»è€Œä¸æ˜¯GameObject
             myCollisionRadius = GetComponent<CapsuleCollider>().radius;
             targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
-
-            StartCoroutine(UpdatePath()); // ¿ªÊ¼Ğ­³Ì
         }
+    }
+
+    protected override void Start()
+    {
+        base.Start(); // ç»§æ‰¿å¹¶ä¿ç•™äº†çˆ¶ç±»çš„Start()ä¸­æ‰§è¡Œçš„æ‰€æœ‰ä»£ç ï¼Œå¦åˆ™å®Œå…¨è¦†ç›–æ‰çˆ¶ç±»çš„Startæ–¹æ³•
+        //pathfinder = GetComponent<NavMeshAgent>();
+        ////skinMaterial = GetComponent<Renderer>().material;
+        ////originalColour = skinMaterial.color;
+
+        //if (GameObject.FindGameObjectWithTag("Player") != null)
+        if (hasTarget)
+        {
+            //    hasTarget = true;
+            currentState = State.Chasing; // è®¾ç½®æ•Œäººåˆå§‹çŠ¶æ€ä¸ºChasing
+            //    target = GameObject.FindGameObjectWithTag("Player").transform;
+            //    targetEntity = target.GetComponent<LivingEntity>(); // è·å–ç±»è€Œä¸æ˜¯GameObject
+            targetEntity.OnDeath += OnTargetDeath; // å°†æ–¹æ³•æ³¨å†Œåˆ°äº‹ä»¶ä¸­ï¼Œç­‰å¾…è§¦å‘
+            //    myCollisionRadius = GetComponent<CapsuleCollider>().radius;
+            //    targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
+            StartCoroutine(UpdatePath()); // å¼€å§‹åç¨‹
+        }
+    }
+
+    public void SetCharacteristics(float moveSpeed, int hitsToKillPlayer, float enemyHealth, Color skinColour)
+    {
+        pathfinder.speed = moveSpeed;
+
+        if (hasTarget)
+        {
+            damage = Mathf.Ceil(targetEntity.startingHealth / hitsToKillPlayer);
+        }
+        startingHealth = enemyHealth;
+        skinMaterial = GetComponent<Renderer>().material;
+        skinMaterial.color = skinColour;
+        originalColour = skinMaterial.color;
+    }
+
+    public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
+    {
+        if (damage >= health)
+        {
+            Destroy(Instantiate(deathEffect.gameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)), deathEffect.main.startLifetime.constant);
+        }
+        base.TakeHit(damage, hitPoint, hitDirection);
     }
 
     void OnTargetDeath()
@@ -58,12 +96,12 @@ public class Enemy : LivingEntity
     {
         if (hasTarget)
         {
-            // Ê¹ÓÃĞ­³ÌIEnumerator£¬ÈÃµĞÈËÃ¿¸ô0.25Ãë¶ø²»ÊÇÒ»Ö¡¾ÍÈ¥¼ÆËãĞÂÂ·¾¶£¬ÕâÔÚ¶à¸öµĞÈË¡¢¶àÖÖÂ·¾¶Çé¿öÏÂÓĞºÜ´ó¸ºµ£
+            // ä½¿ç”¨åç¨‹IEnumeratorï¼Œè®©æ•Œäººæ¯éš”0.25ç§’è€Œä¸æ˜¯ä¸€å¸§å°±å»è®¡ç®—æ–°è·¯å¾„ï¼Œè¿™åœ¨å¤šä¸ªæ•Œäººã€å¤šç§è·¯å¾„æƒ…å†µä¸‹æœ‰å¾ˆå¤§è´Ÿæ‹…
             //pathfinder.SetDestination(target.position);
 
             if (Time.time > nextAttackTime)
             {
-                float sqrDstToTarget = (target.position - transform.position).sqrMagnitude; // Ö»ÓÃÆ½·½Öµ¿ÉÊ¡È¥¿ª·½²½Öè
+                float sqrDstToTarget = (target.position - transform.position).sqrMagnitude; // åªç”¨å¹³æ–¹å€¼å¯çœå»å¼€æ–¹æ­¥éª¤
                 if (sqrDstToTarget < Mathf.Pow(attackDistanceThreshold + myCollisionRadius + targetCollisionRadius, 2))
                 {
                     nextAttackTime = Time.time + timeBetweenAttacks;
@@ -75,16 +113,16 @@ public class Enemy : LivingEntity
 
     IEnumerator Attack()
     {
-        // ×ö³öÒ»¸öÏòÇ°¹­²½µÄ¶¯×÷
+        // åšå‡ºä¸€ä¸ªå‘å‰å¼“æ­¥çš„åŠ¨ä½œ
 
         currentState = State.Attacking;
-        pathfinder.enabled = false; // ¹¥»÷Ê±¹Ø±ÕÑ°Â·¹¦ÄÜ
+        pathfinder.enabled = false; // æ”»å‡»æ—¶å…³é—­å¯»è·¯åŠŸèƒ½
         /*
-         * µ«ÊÇÕâÀïÓĞ¸öÎÊÌâ¾ÍÊÇµ±¹Ø±ÕÁËpathfinderÖ®ºó£¬UpdatePathĞ­³ÌÖĞ»áÔÚ
-         * pathfinder.SetDestination(targetPosition)µ÷ÓÃ¸ÃÊôĞÔ£¬½ø¶ø±¨´í¡£
-         * ËùÒÔÕâÀï¿¼ÂÇÉèÖÃÒ»¸öµĞÈËµÄ×´Ì¬£¬Ê²Ã´×´Ì¬ÏÂ¸Ã×öÊ²Ã´ÊÂ¡£
+         * ä½†æ˜¯è¿™é‡Œæœ‰ä¸ªé—®é¢˜å°±æ˜¯å½“å…³é—­äº†pathfinderä¹‹åï¼ŒUpdatePathåç¨‹ä¸­ä¼šåœ¨
+         * pathfinder.SetDestination(targetPosition)è°ƒç”¨è¯¥å±æ€§ï¼Œè¿›è€ŒæŠ¥é”™ã€‚
+         * æ‰€ä»¥è¿™é‡Œè€ƒè™‘è®¾ç½®ä¸€ä¸ªæ•Œäººçš„çŠ¶æ€ï¼Œä»€ä¹ˆçŠ¶æ€ä¸‹è¯¥åšä»€ä¹ˆäº‹ã€‚
          * 
-         * ÍØÕ¹£¨Î´×ö£©£º¼ÈÈ»ÒÑ¾­ÉèÖÃÁË×´Ì¬£¬ÄÇÊÇ²»ÊÇ¿ÉÒÔ²»ÉèÖÃPathfinderµÄ»îĞÔÄØ£¿
+         * æ‹“å±•ï¼ˆæœªåšï¼‰ï¼šæ—¢ç„¶å·²ç»è®¾ç½®äº†çŠ¶æ€ï¼Œé‚£æ˜¯ä¸æ˜¯å¯ä»¥ä¸è®¾ç½®Pathfinderçš„æ´»æ€§å‘¢ï¼Ÿ
          */
 
         Vector3 originalPosition = transform.position;
@@ -95,7 +133,7 @@ public class Enemy : LivingEntity
         float percent = 0;
 
         skinMaterial.color = Color.red;
-        bool hasAppliedDamage = false; // ÊÇ·ñÒÑ¾­´¥·¢¹¥»÷
+        bool hasAppliedDamage = false; // æ˜¯å¦å·²ç»è§¦å‘æ”»å‡»
 
         while (percent <= 1)
         {
@@ -109,14 +147,14 @@ public class Enemy : LivingEntity
             float interpolation = (-Mathf.Pow(percent, 2) + percent) * 4;
             // y = 4(-x^2 + x) [0,0.5,1] -> [0,1,0]
             transform.position = Vector3.Lerp(originalPosition, attackPosition, interpolation);
-            // Lerp(Vector3 a, Vector3 b, float t) ·µ»Ø a+t*(b-a)
+            // Lerp(Vector3 a, Vector3 b, float t) è¿”å› a+t*(b-a)
 
-            yield return null; // ÓÃ0»òÕßnullÀ´yieldµÄÒâË¼ÊÇ¸æËßĞ­³ÌµÈ´ıÏÂÒ»Ö¡£¬Ö±µ½¼ÌĞøÖ´ĞĞÎªÖ¹¡£
+            yield return null; // ç”¨0æˆ–è€…nullæ¥yieldçš„æ„æ€æ˜¯å‘Šè¯‰åç¨‹ç­‰å¾…ä¸‹ä¸€å¸§ï¼Œç›´åˆ°ç»§ç»­æ‰§è¡Œä¸ºæ­¢ã€‚
         }
 
         skinMaterial.color = originalColour;
         currentState = State.Chasing;
-        pathfinder.enabled = true; // ¹¥»÷Ö®ºó»Ö¸´µ¼º½¹¦ÄÜ
+        pathfinder.enabled = true; // æ”»å‡»ä¹‹åæ¢å¤å¯¼èˆªåŠŸèƒ½
     }
 
     IEnumerator UpdatePath()
@@ -129,7 +167,7 @@ public class Enemy : LivingEntity
             {
                 Vector3 dirToTarget = (target.position - transform.position).normalized;
                 Vector3 targetPosition = target.position - dirToTarget * (myCollisionRadius + targetCollisionRadius + attackDistanceThreshold/2);
-                if (!dead) // ×÷ÕßµÄÔ­Òâ£ºÈç¹û¶ÔÏóÔÚÏú»ÙºóÈÔ»áÔËĞĞÒ»´ÎÑ°ÕÒÂ·¾¶£¬ËùÒÔÒª¼Ó¸öÅĞ¶Ï
+                if (!dead) // ä½œè€…çš„åŸæ„ï¼šå¦‚æœå¯¹è±¡åœ¨é”€æ¯åä»ä¼šè¿è¡Œä¸€æ¬¡å¯»æ‰¾è·¯å¾„ï¼Œæ‰€ä»¥è¦åŠ ä¸ªåˆ¤æ–­
                 {
                     pathfinder.SetDestination(targetPosition);
                 }
